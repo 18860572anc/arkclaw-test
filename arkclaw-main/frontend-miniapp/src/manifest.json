@@ -1,0 +1,23 @@
+{
+  "name": "ArkClaw 小程序",
+  "appid": "wx86e9385dbd690cc1",
+  "description": "ArkClaw customer and agent mini program consoles",
+  "versionName": "0.1.0",
+  "versionCode": "100",
+  "h5": {
+    "router": {
+      "mode": "hash",
+      "base": "/"
+    }
+  },
+  "mp-weixin": {
+    "appid": "wx86e9385dbd690cc1",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "postcss": true,
+      "minified": true
+    },
+    "usingComponents": true
+  }
+}

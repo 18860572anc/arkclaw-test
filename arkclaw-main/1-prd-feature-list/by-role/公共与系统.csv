@@ -1,0 +1,32 @@
+﻿feature_id,角色域,一级功能,二级功能,三级功能,四级功能,功能点,功能说明,优先级,验收要点,备注,是否有原型,开发是否已实现,版本
+SYS-001-01,公共与系统,账号与身份,统一登录,账号密码登录,展示统一登录入口,展示统一登录入口,展示账号、密码、登录类型等基础登录控件。,T0,用户可进入登录页并看到账号密码登录入口。,真实权限与后端登录态需后续接入,http://localhost:5160/login,是,v1.0
+SYS-001-02,公共与系统,账号与身份,统一登录,账号密码登录,提交账号密码登录,提交账号密码登录,校验账号密码并提交登录请求。,T0,账号密码正确时返回登录态，错误时展示失败原因。,真实权限与后端登录态需后续接入,http://localhost:5160/login,是,v1.0
+SYS-001-03,公共与系统,账号与身份,统一登录,账号密码登录,按角色进入工作台,按角色进入工作台,登录成功后根据角色进入对应工作台。,T0,客户、销售、管理员、运维等角色进入正确首页。,真实权限与后端登录态需后续接入,http://localhost:5160/login,是,v1.0
+SYS-001-04,公共与系统,账号与身份,统一登录,账号密码登录,处理登录失败,处理登录失败,处理账号不存在、密码错误、禁用等异常。,T0,登录失败时不进入系统，并展示明确错误。,真实权限与后端登录态需后续接入,http://localhost:5160/login,是,v1.0
+SYS-003-01,公共与系统,开户注册,企业信息登记,USCC 去重,填写企业基础信息,填写企业基础信息,开户注册时填写企业名称、USCC、联系人等信息。,T0,必填字段缺失时阻止提交。,后端唯一性约束需实现；企业注册页已要求企业信息必填,http://localhost:5160/register,是,v1.0
+SYS-003-02,公共与系统,开户注册,企业信息登记,USCC 去重,校验统一社会信用代码,校验统一社会信用代码,提交前检查 USCC 格式和重复企业。,T0,重复或格式错误时给出明确提示。,后端唯一性约束需实现；企业注册页已要求企业信息必填,http://localhost:5160/register,是,v1.0
+SYS-003-03,公共与系统,开户注册,企业信息登记,USCC 去重,校验企业名称重复,校验企业名称重复,提交前检查企业名称是否已存在。,T0,重复企业名称提示用户联系销售或后台处理。,后端唯一性约束需实现；企业注册页已要求企业信息必填,http://localhost:5160/register,是,v1.0
+SYS-004-01,公共与系统,开户注册,销售归属,分享链接归因,识别分享链接参数,识别分享链接参数,注册页识别销售链接或邀请码中的归因参数。,T0,参数有效时展示对应销售归属信息。,需要保留归因来源和时间；重审：部分已实现；邀请码参数识别已接真实后端，分享链接 ref 仍偏 mock。,http://localhost:5160/sales/share http://localhost:5160/register,是,v1.0
+SYS-004-02,公共与系统,开户注册,销售归属,分享链接归因,绑定销售归属,绑定销售归属,客户开户注册成功后绑定到对应销售。,T0,客户在销售客户池和后台均能看到归属关系。,需要保留归因来源和时间；重审：部分已实现；邀请码注册可绑定 ownerSalesId，分享链接绑定未完整真实化。,http://localhost:5160/sales/share http://localhost:5160/register,是,v1.0
+SYS-004-03,公共与系统,开户注册,销售归属,分享链接归因,记录归因来源,记录归因来源,记录链接、邀请码、注册时间和销售信息。,T0,后台可追溯客户归因来源。,需要保留归因来源和时间；重审：部分已实现；已记录归属和来源字段，缺少完整链接/资源级归因明细。,http://localhost:5160/sales/share http://localhost:5160/register,是,v1.0
+SYS-004-04,公共与系统,开户注册,销售归属,分享链接归因,处理无效邀请码,处理无效邀请码,无效、过期或不匹配的邀请码不绑定销售。,T0,用户可继续注册但归属进入公共池或待分配。,需要保留归因来源和时间；重审：部分已实现；无效邀请码可继续注册，但当前前端默认 ownerSalesId=1，公共池兜底不严格。,http://localhost:5160/sales/share http://localhost:5160/register,是,v1.0
+SYS-005-01,公共与系统,开户注册,销售归属,公共池分配,创建公共池线索,创建公共池线索,自然访问或咨询留资客户进入公共池。,T0,后台能看到未分配线索或客户。,冲突处理后置；重审：部分已实现；公开留资可进入未分配池。,http://localhost:5160/admin/leads http://localhost:5160/admin/sales,是,v1.0
+SYS-005-02,公共与系统,开户注册,销售归属,公共池分配,分配销售负责人,分配销售负责人,管理员将公共池客户分配给指定销售。,T0,分配后销售侧能看到该客户。,冲突处理后置；重审：部分已实现；后端分配能力已具备，管理页分配按钮/弹窗未完整接入。,http://localhost:5160/admin/leads http://localhost:5160/admin/sales,是,v1.0
+SYS-005-03,公共与系统,开户注册,销售归属,公共池分配,记录分配历史,记录分配历史,记录分配人、被分配销售、时间和原因。,T0,客户归属变更有可追溯记录。,冲突处理后置；重审：部分已实现；记录当前分配信息，缺少完整历史和原因。,http://localhost:5160/admin/leads http://localhost:5160/admin/sales,是,v1.0
+SYS-005-04,公共与系统,开户注册,销售归属,公共池分配,处理归属冲突,处理归属冲突,客户已归属时提示冲突并阻止重复分配。,T0,冲突状态清晰展示并保留处理入口。,冲突处理后置；重审：部分已实现；已有重复和终态限制，缺少完整归属冲突处理界面。,http://localhost:5160/admin/leads http://localhost:5160/admin/sales,是,v1.0
+SYS-006-01,公共与系统,权限体系,角色路由,基础角色跳转,识别当前用户角色,识别当前用户角色,根据登录态识别用户角色集合。,T0,角色信息可用于导航和权限判断。,基础角色跳转已实现；按钮级权限不纳入当前设计,http://localhost:5160/tenant/overview http://localhost:5160/sales/dashboard http://localhost:5160/admin/dashboard http://localhost:5160/ops/tickets,是,v1.0
+SYS-006-02,公共与系统,权限体系,角色路由,基础角色跳转,展示角色对应导航,展示角色对应导航,不同角色只展示对应导航分组。,T0,客户、销售、管理员、运维看到不同菜单。,基础角色跳转已实现；按钮级权限不纳入当前设计,http://localhost:5160/tenant/overview http://localhost:5160/sales/dashboard http://localhost:5160/admin/dashboard http://localhost:5160/ops/tickets,是,v1.0
+SYS-006-03,公共与系统,权限体系,角色路由,基础角色跳转,限制无权限页面访问,限制无权限页面访问,访问非角色页面时跳转或提示无权限。,T0,用户不能进入不属于自己角色的页面。,基础角色跳转已实现；按钮级权限不纳入当前设计,http://localhost:5160/tenant/overview http://localhost:5160/sales/dashboard http://localhost:5160/admin/dashboard http://localhost:5160/ops/tickets,是,v1.0
+SYS-006-04,公共与系统,权限体系,角色路由,基础角色跳转,保留默认工作台,保留默认工作台,多角色或异常角色有默认落地页。,T0,未匹配角色不会进入空白页。,基础角色跳转已实现；按钮级权限不纳入当前设计,http://localhost:5160/tenant/overview http://localhost:5160/sales/dashboard http://localhost:5160/admin/dashboard http://localhost:5160/ops/tickets,是,v1.0
+SYS-007-01,公共与系统,通知中心,通知列表,角色通知,展示通知列表,展示通知列表,按角色展示站内通知和待处理事项。,P1,列表显示标题、类型、优先级、时间和状态。,Beta1 可只保留关键待办入口,http://localhost:5160/tenant/notifications http://localhost:5160/sales/notifications http://localhost:5160/admin/notifications http://localhost:5160/ops/notifications,否,v1.1
+SYS-007-02,公共与系统,通知中心,通知列表,角色通知,区分未读已读,区分未读已读,通知支持未读、已读状态展示。,P1,点击或操作后通知状态可变更。,Beta1 可只保留关键待办入口,http://localhost:5160/tenant/notifications http://localhost:5160/sales/notifications http://localhost:5160/admin/notifications http://localhost:5160/ops/notifications,否,v1.1
+SYS-007-03,公共与系统,通知中心,通知列表,角色通知,跳转关联业务,跳转关联业务,通知关联业务对象并跳转到处理页面。,P1,点击通知能进入订单、工单、线索等业务。,Beta1 可只保留关键待办入口,http://localhost:5160/tenant/notifications http://localhost:5160/sales/notifications http://localhost:5160/admin/notifications http://localhost:5160/ops/notifications,否,v1.1
+SYS-007-04,公共与系统,通知中心,通知列表,角色通知,处理空状态和异常,处理空状态和异常,无通知或加载失败时展示合适状态。,P1,空状态和错误状态不影响页面使用。,Beta1 可只保留关键待办入口,http://localhost:5160/tenant/notifications http://localhost:5160/sales/notifications http://localhost:5160/admin/notifications http://localhost:5160/ops/notifications,否,v1.1
+SYS-008-01,公共与系统,审计与安全,操作审计,全局审计,记录关键操作日志,记录关键操作日志,对登录、审核、分配、开通、退款等操作留痕。,P1,日志包含操作者、对象、动作、时间和结果。,后台应先记日志，管理页可后补,http://localhost:5160/admin/system/audit http://localhost:5160/tenant/audit,否,v1.1
+SYS-008-02,公共与系统,审计与安全,操作审计,全局审计,查询审计日志,查询审计日志,管理员按时间、操作者、对象和动作查询日志。,P1,筛选条件能缩小结果范围。,后台应先记日志，管理页可后补,http://localhost:5160/admin/system/audit http://localhost:5160/tenant/audit,否,v1.1
+SYS-008-03,公共与系统,审计与安全,操作审计,全局审计,查看日志详情,查看日志详情,查看单条操作的前后值和失败原因。,P1,详情能辅助排查业务问题。,后台应先记日志，管理页可后补,http://localhost:5160/admin/system/audit http://localhost:5160/tenant/audit,否,v1.1
+SYS-008-04,公共与系统,审计与安全,操作审计,全局审计,导出审计结果,导出审计结果,按筛选条件导出审计日志。,P1,导出内容与当前筛选一致。,后台应先记日志，管理页可后补,http://localhost:5160/admin/system/audit http://localhost:5160/tenant/audit,否,v1.1
+SYS-009-01,公共与系统,个人中心,账号资料,基础资料,查看个人资料,查看个人资料,展示姓名、手机号、邮箱、角色和所属组织。,P1,用户能看到自己的基础账号信息。,不阻断 Beta1 主链路,http://localhost:5160/sales/profile,否,v1.1
+SYS-009-02,公共与系统,个人中心,账号资料,基础资料,修改基础资料,修改基础资料,允许用户维护头像、昵称、联系方式等字段。,P1,保存成功后页面展示新资料。,不阻断 Beta1 主链路,http://localhost:5160/sales/profile,否,v1.1
+SYS-009-03,公共与系统,个人中心,账号资料,基础资料,修改登录密码,修改登录密码,用户通过旧密码或短信验证码修改密码。,P1,密码修改后旧密码不可继续登录。,不阻断 Beta1 主链路,http://localhost:5160/sales/profile,否,v1.1
+SYS-009-04,公共与系统,个人中心,账号资料,基础资料,配置通知偏好,配置通知偏好,用户配置可接收的通知类型。,P1,偏好保存后影响后续通知展示。,不阻断 Beta1 主链路,http://localhost:5160/sales/profile,否,v1.1

@@ -1,0 +1,112 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "ArkClaw 小程序"
+      }
+    },
+    {
+      "path": "pages/tenant/index",
+      "style": {
+        "navigationBarTitleText": "客户管理员"
+      }
+    },
+    {
+      "path": "pages/tenant/purchase",
+      "style": {
+        "navigationBarTitleText": "购买席位"
+      }
+    },
+    {
+      "path": "pages/tenant/checkout",
+      "style": {
+        "navigationBarTitleText": "订单确认"
+      }
+    },
+    {
+      "path": "pages/tenant/cashier",
+      "style": {
+        "navigationBarTitleText": "收银台"
+      }
+    },
+    {
+      "path": "pages/tenant/orders",
+      "style": {
+        "navigationBarTitleText": "我的订单"
+      }
+    },
+    {
+      "path": "pages/tenant/invoice-apply",
+      "style": {
+        "navigationBarTitleText": "填写发票信息"
+      }
+    },
+    {
+      "path": "pages/tenant/invoice-result",
+      "style": {
+        "navigationBarTitleText": "填写发票信息"
+      }
+    },
+    {
+      "path": "pages/tenant/invoice-detail",
+      "style": {
+        "navigationBarTitleText": "发票详情"
+      }
+    },
+    {
+      "path": "pages/tenant/invoice-center",
+      "style": {
+        "navigationBarTitleText": "发票中心"
+      }
+    },
+    {
+      "path": "pages/tenant/invoice-title-edit",
+      "style": {
+        "navigationBarTitleText": "发票抬头"
+      }
+    },
+    {
+      "path": "pages/tenant/profile-edit",
+      "style": {
+        "navigationBarTitleText": "资料编辑"
+      }
+    },
+    {
+      "path": "pages/tenant/settings",
+      "style": {
+        "navigationBarTitleText": "设置"
+      }
+    },
+    {
+      "path": "pages/tenant/legal",
+      "style": {
+        "navigationBarTitleText": "协议"
+      }
+    },
+    {
+      "path": "pages/tenant/notifications",
+      "style": {
+        "navigationBarTitleText": "消息中心"
+      }
+    },
+    {
+      "path": "pages/tenant/bank-transfer",
+      "style": {
+        "navigationBarTitleText": "对公转账"
+      }
+    },
+    {
+      "path": "pages/agent/index",
+      "style": {
+        "navigationBarTitleText": "代理管理员"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTitleText": "ArkClaw 小程序",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f4f6fb"
+  }
+}
