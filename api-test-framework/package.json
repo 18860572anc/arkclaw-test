@@ -1,0 +1,37 @@
+{
+  "name": "arkclaw-api-test",
+  "version": "1.0.0",
+  "description": "ArkClaw 接口自动化测试框架",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --config jest.config.js",
+    "test:report": "jest --config jest.config.js --reporters=default --reporters=jest-html-reporter",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:mirror": "ENV=mirror jest --config jest.config.js",
+    "test:main": "ENV=main jest --config jest.config.js"
+  },
+  "keywords": [
+    "api",
+    "testing",
+    "automation",
+    "arkclaw"
+  ],
+  "author": "Test Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "jest": "^29.7.0",
+    "jest-html-reporter": "^3.10.2",
+    "joi": "^17.11.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.10",
+    "@types/node": "^20.10.4",
+    "@types/uuid": "^9.0.7",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  }
+}

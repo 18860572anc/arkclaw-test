@@ -1,0 +1,290 @@
+<html><head><meta charset="utf-8"/><title>ArkClaw API 测试报告</title><style type="text/css">html,
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+body {
+  padding: 2rem 1rem;
+  font-size: 0.85rem;
+}
+.jesthtml-content {
+  margin: 0 auto;
+  max-width: 70rem;
+}
+header {
+  display: flex;
+  align-items: center;
+}
+#title {
+  margin: 0;
+  flex-grow: 1;
+}
+#logo {
+  height: 4rem;
+}
+#timestamp {
+  color: #777;
+  margin-top: 0.5rem;
+}
+
+/** SUMMARY */
+#summary {
+  color: #333;
+  margin: 2rem 0;
+  display: flex;
+  font-family: monospace;
+  font-size: 1rem;
+}
+#summary > div {
+  margin-right: 2rem;
+  background: #eee;
+  padding: 1rem;
+  min-width: 15rem;
+}
+#summary > div:last-child {
+  margin-right: 0;
+}
+@media only screen and (max-width: 720px) {
+  #summary {
+    flex-direction: column;
+  }
+  #summary > div {
+    margin-right: 0;
+    margin-top: 2rem;
+  }
+  #summary > div:first-child {
+    margin-top: 0;
+  }
+}
+
+.summary-total {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.summary-passed {
+  color: #4f8a10;
+  border-left: 0.4rem solid #4f8a10;
+  padding-left: 0.5rem;
+}
+.summary-failed,
+.summary-obsolete-snapshots {
+  color: #d8000c;
+  border-left: 0.4rem solid #d8000c;
+  padding-left: 0.5rem;
+}
+.summary-pending {
+  color: #9f6000;
+  border-left: 0.4rem solid #9f6000;
+  padding-left: 0.5rem;
+}
+.summary-empty {
+  color: #999;
+  border-left: 0.4rem solid #999;
+}
+
+.test-result {
+  padding: 1rem;
+  margin-bottom: 0.25rem;
+}
+.test-result:last-child {
+  border: 0;
+}
+.test-result.passed {
+  background-color: #dff2bf;
+  color: #4f8a10;
+}
+.test-result.failed {
+  background-color: #ffbaba;
+  color: #d8000c;
+}
+.test-result.pending {
+  background-color: #ffdf61;
+  color: #9f6000;
+}
+
+.test-info {
+  display: flex;
+  justify-content: space-between;
+}
+.test-suitename {
+  width: 20%;
+  text-align: left;
+  font-weight: bold;
+  word-break: break-word;
+}
+.test-title {
+  width: 40%;
+  text-align: left;
+  font-style: italic;
+}
+.test-status {
+  width: 20%;
+  text-align: right;
+}
+.test-duration {
+  width: 10%;
+  text-align: right;
+  font-size: 0.75rem;
+}
+
+.failureMessages {
+  padding: 0 1rem;
+  margin-top: 1rem;
+  border-top: 1px dashed #d8000c;
+}
+.failureMessages.suiteFailure {
+  border-top: none;
+}
+.failureMsg {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+
+.suite-container {
+  margin-bottom: 2rem;
+}
+.suite-container > input[type="checkbox"] {
+  position: absolute;
+  left: -100vw;
+}
+.suite-container label {
+  display: block;
+}
+.suite-container .suite-tests {
+  overflow-y: hidden;
+  height: 0;
+}
+.suite-container > input[type="checkbox"]:checked ~ .suite-tests {
+  height: auto;
+  overflow: visible;
+}
+.suite-info {
+  padding: 1rem;
+  background-color: #eee;
+  color: #777;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.suite-info:hover {
+  background-color: #ddd;
+  cursor: pointer;
+}
+.suite-info .suite-path {
+  word-break: break-all;
+  flex-grow: 1;
+  font-family: monospace;
+  font-size: 1rem;
+}
+.suite-info .suite-time {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.75rem;
+}
+.suite-info .suite-time.warn {
+  background-color: #d8000c;
+  color: #fff;
+}
+.suite-info:before {
+  content: "\2303";
+  display: inline-block;
+  margin-right: 0.5rem;
+  transform: rotate(0deg);
+}
+.suite-container > input[type="checkbox"]:checked ~ label .suite-info:before {
+  transform: rotate(180deg);
+}
+
+/* CONSOLE LOGS */
+.suite-consolelog {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: #efefef;
+}
+.suite-consolelog-header {
+  font-weight: bold;
+}
+.suite-consolelog-item {
+  padding: 0.5rem;
+}
+.suite-consolelog-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-consolelog-item-origin {
+  color: #777;
+  font-weight: bold;
+}
+.suite-consolelog-item-message {
+  color: #000;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+
+/* OBSOLETE SNAPSHOTS */
+.suite-obsolete-snapshots {
+  margin-bottom: 0.25rem;
+  padding: 1rem;
+  background-color: #ffbaba;
+  color: #d8000c;
+}
+.suite-obsolete-snapshots-header {
+  font-weight: bold;
+}
+.suite-obsolete-snapshots-item {
+  padding: 0.5rem;
+}
+.suite-obsolete-snapshots-item pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+.suite-obsolete-snapshots-item-message {
+  color: #000;
+  font-size: 1rem;
+  padding: 0 0.5rem;
+}
+</style></head><body><div class="jesthtml-content"><header><h1 id="title">ArkClaw API 测试报告</h1></header><div id="metadata-container"><div id="timestamp">Started: 2026-06-22 16:18:47</div><div id="summary"><div id="suite-summary"><div class="summary-total">Suites (1)</div><div class="summary-passed  summary-empty">0 passed</div><div class="summary-failed ">1 failed</div><div class="summary-pending  summary-empty">0 pending</div></div><div id="test-summary"><div class="summary-total">Tests (30)</div><div class="summary-passed ">27 passed</div><div class="summary-failed ">3 failed</div><div class="summary-pending  summary-empty">0 pending</div></div></div></div><div id="suite-1" class="suite-container"><input id="collapsible-0" type="checkbox" class="toggle" checked="checked"/><label for="collapsible-0"><div class="suite-info"><div class="suite-path">/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/tests/workflow.test.ts</div><div class="suite-time">3.813s</div></div></label><div class="suite-tests"><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段1：企业注册（三种方式）</div><div class="test-title">方式一：客户管理员（企业）在首页注册</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段1：企业注册（三种方式）</div><div class="test-title">方式二：商务（代理）人员注册企业</div><div class="test-status">passed</div><div class="test-duration">0.41s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段1：企业注册（三种方式）</div><div class="test-title">方式三：官方管理员注册企业</div><div class="test-status">passed</div><div class="test-duration">0.264s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段2：工单与咨询</div><div class="test-title">企业提交工单咨询</div><div class="test-status">passed</div><div class="test-duration">0s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段2：工单与咨询</div><div class="test-title">查询工单列表</div><div class="test-status">passed</div><div class="test-duration">0.026s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段3：席位购买（订单创建）</div><div class="test-title">客户管理员创建席位购买订单</div><div class="test-status">passed</div><div class="test-duration">0.238s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段3：席位购买（订单创建）</div><div class="test-title">创建微信/支付宝付款订单（跳过交付运维）</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段4：交付运维管理员审核</div><div class="test-title">交付运维管理员登录</div><div class="test-status">passed</div><div class="test-duration">0.189s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段4：交付运维管理员审核</div><div class="test-title">交付运维管理员查看全部待审核工单</div><div class="test-status">passed</div><div class="test-duration">0.028s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段4：交付运维管理员审核</div><div class="test-title">交付运维管理员初步审核工单</div><div class="test-status">passed</div><div class="test-duration">0.023s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段4.1：普通交付运维人员操作</div><div class="test-title">普通交付运维人员登录</div><div class="test-status">passed</div><div class="test-duration">0.199s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段4.1：普通交付运维人员操作</div><div class="test-title">普通交付运维人员查看分配给自己的工单</div><div class="test-status">passed</div><div class="test-duration">0.026s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段5：财务人员审核</div><div class="test-title">财务人员登录</div><div class="test-status">passed</div><div class="test-duration">0.2s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段5：财务人员审核</div><div class="test-title">财务人员审核银行转账记录</div><div class="test-status">passed</div><div class="test-duration">0.029s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段6：交付开通</div><div class="test-title">交付运维管理员进行服务开通</div><div class="test-status">passed</div><div class="test-duration">0.249s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段7：商务测试释放佣金</div><div class="test-title">商务人员进行测试并释放佣金</div><div class="test-status">passed</div><div class="test-duration">0.213s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">主站完整业务流程测试 &gt; 阶段8：财务最终审核</div><div class="test-title">财务人员进行最终审核</div><div class="test-status">passed</div><div class="test-duration">0.157s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">镜像站业务流程测试 &gt; 阶段1：镜像站客户注册</div><div class="test-title">镜像站客户管理员注册企业</div><div class="test-status">passed</div><div class="test-duration">0.257s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">镜像站业务流程测试 &gt; 阶段2：镜像站席位购买</div><div class="test-title">镜像站客户购买席位</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">镜像站业务流程测试 &gt; 阶段3：镜像站财务审核</div><div class="test-title">镜像站财务人员审核确认</div><div class="test-status">passed</div><div class="test-duration">0.229s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">镜像站业务流程测试 &gt; 阶段4：推送给官方管理员</div><div class="test-title">推送消息给官方管理员</div><div class="test-status">passed</div><div class="test-duration">0.001s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">镜像站业务流程测试 &gt; 阶段5：官方管理员采购</div><div class="test-title">官方管理员进行采购操作</div><div class="test-status">passed</div><div class="test-duration">0.199s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">镜像站业务流程测试 &gt; 阶段6：主站对公转账</div><div class="test-title">主站处理对公转账</div><div class="test-status">passed</div><div class="test-duration">0.031s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">镜像站业务流程测试 &gt; 阶段7：微信/支付宝快速开通</div><div class="test-title">数字支付订单跳过交付运维直接开通</div><div class="test-status">passed</div><div class="test-duration">0s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">异常流程与边界值测试</div><div class="test-title">创建订单缺失必填字段应报错400</div><div class="test-status">passed</div><div class="test-duration">0.026s</div></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">异常流程与边界值测试</div><div class="test-title">确认到账负数金额应报错400</div><div class="test-status">failed</div><div class="test-duration">0.025s</div></div><div class="failureMessages"> <pre class="failureMsg">AxiosError: Request failed with status code 400
+    at settle (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:2199:12)
+    at IncomingMessage.handleStreamEnd (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:4006:11)
+    at IncomingMessage.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1734:12)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:5427:41)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at HttpClient.get (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/client/httpClient.ts:125:22)
+    at Object.listOrders (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/api/orderApi.ts:39:22)
+    at Object.&lt;anonymous&gt; (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/tests/workflow.test.ts:587:20)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">异常流程与边界值测试</div><div class="test-title">确认到账小数金额应报错400</div><div class="test-status">failed</div><div class="test-duration">0.027s</div></div><div class="failureMessages"> <pre class="failureMsg">AxiosError: Request failed with status code 400
+    at settle (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:2199:12)
+    at IncomingMessage.handleStreamEnd (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:4006:11)
+    at IncomingMessage.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1734:12)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:5427:41)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at HttpClient.get (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/client/httpClient.ts:125:22)
+    at Object.listOrders (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/api/orderApi.ts:39:22)
+    at Object.&lt;anonymous&gt; (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/tests/workflow.test.ts:603:20)</pre></div></div><div class="test-result failed"><div class="test-info"><div class="test-suitename">异常流程与边界值测试</div><div class="test-title">确认到账超额金额应报错400</div><div class="test-status">failed</div><div class="test-duration">0.025s</div></div><div class="failureMessages"> <pre class="failureMsg">AxiosError: Request failed with status code 400
+    at settle (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:2199:12)
+    at IncomingMessage.handleStreamEnd (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:4006:11)
+    at IncomingMessage.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1734:12)
+    at processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/node_modules/axios/dist/node/axios.cjs:5427:41)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at HttpClient.get (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/client/httpClient.ts:125:22)
+    at Object.listOrders (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/api/orderApi.ts:39:22)
+    at Object.&lt;anonymous&gt; (/Users/apple/Desktop/ArkClaw_Beta1_测试覆盖文档/api-test-framework/src/tests/workflow.test.ts:619:20)</pre></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">异常流程与边界值测试</div><div class="test-title">获取不存在的订单应报错</div><div class="test-status">passed</div><div class="test-duration">0.026s</div></div></div><div class="test-result passed"><div class="test-info"><div class="test-suitename">异常流程与边界值测试</div><div class="test-title">错误密码登录应报错</div><div class="test-status">passed</div><div class="test-duration">0.03s</div></div></div></div></div></div></body></html>
