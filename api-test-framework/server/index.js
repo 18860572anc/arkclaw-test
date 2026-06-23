@@ -1,0 +1,498 @@
+const express = require('express');
+const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
+
+const app = express();
+const PORT = 3001;
+
+app.use(cors());
+app.use(express.json());
+
+// Mock data
+const mockTenants = [
+  {
+    id: 'tenant-001',
+    name: '测试企业有限公司',
+    uscc: '91310101MA1G812345',
+    status: 'active',
+    createdAt: '2024-01-15T10:30:00Z',
+    updatedAt: '2024-06-20T14:20:00Z',
+    adminName: '张三',
+    adminEmail: 'zhangsan@test.com',
+    adminPhone: '17772627362',
+    address: '上海市浦东新区张江高科技园区',
+    industry: '科技',
+    scale: 'medium',
+    employees: 150
+  },
+  {
+    id: 'tenant-002',
+    name: '示例科技有限公司',
+    uscc: '91310101MA1G867890',
+    status: 'active',
+    createdAt: '2024-02-20T09:15:00Z',
+    updatedAt: '2024-06-18T16:45:00Z',
+    adminName: '李四',
+    adminEmail: 'lisi@example.com',
+    adminPhone: '19902928273',
+    address: '北京市海淀区中关村科技园',
+    industry: '互联网',
+    scale: 'large',
+    employees: 500
+  },
+  {
+    id: 'tenant-003',
+    name: '演示企业股份有限公司',
+    uscc: '91310101MA1G855555',
+    status: 'pending',
+    createdAt: '2024-06-22T08:00:00Z',
+    updatedAt: '2024-06-22T08:00:00Z',
+    adminName: '王五',
+    adminEmail: 'wangwu@demo.com',
+    adminPhone: '18888888888',
+    address: '广东省深圳市南山区科技园',
+    industry: '金融',
+    scale: 'small',
+    employees: 50
+  }
+];
+
+const mockOrders = [
+  {
+    id: 'order-001',
+    tenantId: 'tenant-001',
+    tenantName: '测试企业有限公司',
+    type: 'seat',
+    status: 'paid',
+    totalAmount: 10000.00,
+    paidAmount: 10000.00,
+    paymentMethod: 'bank_transfer',
+    createdAt: '2024-06-20T10:00:00Z',
+    paidAt: '2024-06-20T14:30:00Z',
+    items: [
+      { id: 'item-001', name: '基础席位', quantity: 10, unitPrice: 1000.00, totalPrice: 10000.00 }
+    ]
+  },
+  {
+    id: 'order-002',
+    tenantId: 'tenant-002',
+    tenantName: '示例科技有限公司',
+    type: 'package',
+    status: 'confirmed',
+    totalAmount: 50000.00,
+    paidAmount: 50000.00,
+    paymentMethod: 'alipay',
+    createdAt: '2024-06-19T11:30:00Z',
+    paidAt: '2024-06-19T11:35:00Z',
+    confirmedAt: '2024-06-19T15:00:00Z',
+    items: [
+      { id: 'item-002', name: '高级套餐', quantity: 5, unitPrice: 10000.00, totalPrice: 50000.00 }
+    ]
+  },
+  {
+    id: 'order-003',
+    tenantId: 'tenant-001',
+    tenantName: '测试企业有限公司',
+    type: 'seat',
+    status: 'pending',
+    totalAmount: 5000.00,
+    paidAmount: 0,
+    paymentMethod: 'wechat',
+    createdAt: '2024-06-22T09:00:00Z',
+    items: [
+      { id: 'item-003', name: '基础席位', quantity: 5, unitPrice: 1000.00, totalPrice: 5000.00 }
+    ]
+  },
+  {
+    id: 'order-004',
+    tenantId: 'tenant-003',
+    tenantName: '演示企业股份有限公司',
+    type: 'seat',
+    status: 'activated',
+    totalAmount: 3000.00,
+    paidAmount: 3000.00,
+    paymentMethod: 'bank_transfer',
+    createdAt: '2024-06-21T10:00:00Z',
+    paidAt: '2024-06-21T16:00:00Z',
+    confirmedAt: '2024-06-21T17:00:00Z',
+    items: [
+      { id: 'item-004', name: '基础席位', quantity: 3, unitPrice: 1000.00, totalPrice: 3000.00 }
+    ]
+  },
+  {
+    id: 'order-005',
+    tenantId: 'tenant-002',
+    tenantName: '示例科技有限公司',
+    type: 'topup',
+    status: 'paid',
+    totalAmount: 100000.00,
+    paidAmount: 100000.00,
+    paymentMethod: 'bank_transfer',
+    createdAt: '2024-06-18T09:00:00Z',
+    paidAt: '2024-06-18T14:00:00Z',
+    items: [
+      { id: 'item-005', name: '账户充值', quantity: 1, unitPrice: 100000.00, totalPrice: 100000.00 }
+    ]
+  }
+];
+
+// Tenants API
+app.get('/api/tenants', (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 20;
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  
+  const total = mockTenants.length;
+  const data = mockTenants.slice(start, end);
+  
+  res.json({
+    success: true,
+    code: 200,
+    message: 'success',
+    data,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize)
+    }
+  });
+});
+
+app.get('/api/tenants/:id', (req, res) => {
+  const tenant = mockTenants.find(t => t.id === req.params.id);
+  
+  if (tenant) {
+    res.json({
+      success: true,
+      code: 200,
+      message: 'success',
+      data: tenant
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Tenant not found'
+    });
+  }
+});
+
+app.post('/api/tenants', (req, res) => {
+  const newTenant = {
+    id: 'tenant-' + uuidv4().slice(0, 8),
+    ...req.body,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  mockTenants.push(newTenant);
+  
+  res.status(201).json({
+    success: true,
+    code: 201,
+    message: 'Tenant created successfully',
+    data: newTenant
+  });
+});
+
+app.put('/api/tenants/:id', (req, res) => {
+  const index = mockTenants.findIndex(t => t.id === req.params.id);
+  
+  if (index !== -1) {
+    mockTenants[index] = {
+      ...mockTenants[index],
+      ...req.body,
+      updatedAt: new Date().toISOString()
+    };
+    
+    res.json({
+      success: true,
+      code: 200,
+      message: 'Tenant updated successfully',
+      data: mockTenants[index]
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Tenant not found'
+    });
+  }
+});
+
+app.delete('/api/tenants/:id', (req, res) => {
+  const index = mockTenants.findIndex(t => t.id === req.params.id);
+  
+  if (index !== -1) {
+    mockTenants.splice(index, 1);
+    
+    res.json({
+      success: true,
+      code: 200,
+      message: 'Tenant deleted successfully'
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Tenant not found'
+    });
+  }
+});
+
+app.post('/api/tenants/:id/activate', (req, res) => {
+  const tenant = mockTenants.find(t => t.id === req.params.id);
+  
+  if (tenant) {
+    tenant.status = 'active';
+    tenant.updatedAt = new Date().toISOString();
+    
+    res.json({
+      success: true,
+      code: 200,
+      message: 'Tenant activated successfully',
+      data: tenant
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Tenant not found'
+    });
+  }
+});
+
+app.post('/api/tenants/:id/suspend', (req, res) => {
+  const tenant = mockTenants.find(t => t.id === req.params.id);
+  
+  if (tenant) {
+    tenant.status = 'suspended';
+    tenant.updatedAt = new Date().toISOString();
+    
+    res.json({
+      success: true,
+      code: 200,
+      message: 'Tenant suspended successfully',
+      data: tenant
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Tenant not found'
+    });
+  }
+});
+
+// Orders API
+app.get('/api/orders', (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 20;
+  const status = req.query.status;
+  
+  let filteredOrders = mockOrders;
+  if (status) {
+    filteredOrders = mockOrders.filter(o => o.status === status);
+  }
+  
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  
+  const total = filteredOrders.length;
+  const data = filteredOrders.slice(start, end);
+  
+  res.json({
+    success: true,
+    code: 200,
+    message: 'success',
+    data,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize)
+    }
+  });
+});
+
+app.get('/api/orders/:id', (req, res) => {
+  const order = mockOrders.find(o => o.id === req.params.id);
+  
+  if (order) {
+    res.json({
+      success: true,
+      code: 200,
+      message: 'success',
+      data: order
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Order not found'
+    });
+  }
+});
+
+app.post('/api/orders', (req, res) => {
+  const newOrder = {
+    id: 'order-' + uuidv4().slice(0, 8),
+    ...req.body,
+    status: 'pending',
+    paidAmount: 0,
+    createdAt: new Date().toISOString(),
+    items: req.body.items.map((item, index) => ({
+      ...item,
+      id: 'item-' + uuidv4().slice(0, 8),
+      totalPrice: item.quantity * item.unitPrice
+    }))
+  };
+  
+  // Calculate total amount
+  newOrder.totalAmount = newOrder.items.reduce((sum, item) => sum + item.totalPrice, 0);
+  
+  // Get tenant name
+  const tenant = mockTenants.find(t => t.id === newOrder.tenantId);
+  if (tenant) {
+    newOrder.tenantName = tenant.name;
+  } else {
+    newOrder.tenantName = 'Unknown';
+  }
+  
+  mockOrders.push(newOrder);
+  
+  res.status(201).json({
+    success: true,
+    code: 201,
+    message: 'Order created successfully',
+    data: newOrder
+  });
+});
+
+app.post('/api/orders/:id/confirm-payment', (req, res) => {
+  const order = mockOrders.find(o => o.id === req.params.id);
+  const { actualAmount } = req.body;
+  
+  if (order) {
+    if (actualAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Amount must be greater than 0'
+      });
+    }
+    
+    if (actualAmount > order.totalAmount * 1.5) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Amount exceeds maximum allowed (150% of order total)'
+      });
+    }
+    
+    order.paidAmount = actualAmount;
+    order.status = 'confirmed';
+    order.confirmedAt = new Date().toISOString();
+    
+    res.json({
+      success: true,
+      code: 200,
+      message: 'Payment confirmed successfully',
+      data: order
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Order not found'
+    });
+  }
+});
+
+app.post('/api/orders/:id/cancel', (req, res) => {
+  const order = mockOrders.find(o => o.id === req.params.id);
+  
+  if (order) {
+    if (order.status === 'activated') {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Cannot cancel an activated order'
+      });
+    }
+    
+    order.status = 'cancelled';
+    
+    res.json({
+      success: true,
+      code: 200,
+      message: 'Order cancelled successfully',
+      data: order
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Order not found'
+    });
+  }
+});
+
+app.post('/api/orders/:id/activate', (req, res) => {
+  const order = mockOrders.find(o => o.id === req.params.id);
+  
+  if (order) {
+    if (order.status !== 'confirmed') {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Only confirmed orders can be activated'
+      });
+    }
+    
+    order.status = 'activated';
+    
+    res.json({
+      success: true,
+      code: 200,
+      message: 'Order activated successfully',
+      data: order
+    });
+  } else {
+    res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Order not found'
+    });
+  }
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    code: 200,
+    message: 'Mock server is running'
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Mock server running on http://localhost:${PORT}`);
+  console.log('Available endpoints:');
+  console.log('  GET  /api/tenants');
+  console.log('  GET  /api/tenants/:id');
+  console.log('  POST /api/tenants');
+  console.log('  PUT  /api/tenants/:id');
+  console.log('  DELETE /api/tenants/:id');
+  console.log('  POST /api/tenants/:id/activate');
+  console.log('  POST /api/tenants/:id/suspend');
+  console.log('  GET  /api/orders');
+  console.log('  GET  /api/orders/:id');
+  console.log('  POST /api/orders');
+  console.log('  POST /api/orders/:id/confirm-payment');
+  console.log('  POST /api/orders/:id/cancel');
+  console.log('  POST /api/orders/:id/activate');
+});
