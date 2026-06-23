@@ -338,13 +338,75 @@ app.get('/api/orders/:id', (req, res) => {
 });
 
 app.post('/api/orders', (req, res) => {
+  // 参数验证
+  const { tenantId, type, paymentMethod, items } = req.body;
+  
+  if (!tenantId) {
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      message: 'tenantId is required'
+    });
+  }
+  
+  if (!type || !['seat', 'package', 'topup', 'invoice'].includes(type)) {
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      message: 'Invalid order type. Must be one of: seat, package, topup, invoice'
+    });
+  }
+  
+  if (!paymentMethod || !['alipay', 'wechat', 'bank_transfer', 'coupon'].includes(paymentMethod)) {
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      message: 'Invalid payment method. Must be one of: alipay, wechat, bank_transfer, coupon'
+    });
+  }
+  
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      message: 'Items array is required and cannot be empty'
+    });
+  }
+  
+  // 验证每个订单项
+  for (const item of items) {
+    if (!item.name || typeof item.name !== 'string') {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Each item must have a valid name'
+      });
+    }
+    if (!item.quantity || item.quantity <= 0) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Each item must have a quantity greater than 0'
+      });
+    }
+    if (!item.unitPrice || item.unitPrice <= 0) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Each item must have a unit price greater than 0'
+      });
+    }
+  }
+  
   const newOrder = {
     id: 'order-' + uuidv4().slice(0, 8),
-    ...req.body,
+    tenantId,
+    type,
+    paymentMethod,
     status: 'pending',
     paidAmount: 0,
     createdAt: new Date().toISOString(),
-    items: req.body.items.map((item, index) => ({
+    items: items.map((item) => ({
       ...item,
       id: 'item-' + uuidv4().slice(0, 8),
       totalPrice: item.quantity * item.unitPrice
@@ -369,6 +431,120 @@ app.post('/api/orders', (req, res) => {
     code: 201,
     message: 'Order created successfully',
     data: newOrder
+  });
+});
+
+// PUT 更新订单
+app.put('/api/orders/:id', (req, res) => {
+  const order = mockOrders.find(o => o.id === req.params.id);
+  
+  if (!order) {
+    return res.status(404).json({
+      success: false,
+      code: 404,
+      message: 'Order not found'
+    });
+  }
+  
+  // 不能更新已激活、已取消或已确认的订单（只能更新待处理订单）
+  if (order.status === 'activated') {
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      message: 'Cannot update an activated order'
+    });
+  }
+  
+  if (order.status === 'cancelled') {
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      message: 'Cannot update a cancelled order'
+    });
+  }
+  
+  if (order.status === 'confirmed') {
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      message: 'Cannot update a confirmed order'
+    });
+  }
+  
+  const { items, paymentMethod, type } = req.body;
+  
+  // 更新订单类型
+  if (type) {
+    if (!['seat', 'package', 'topup', 'invoice'].includes(type)) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Invalid order type. Must be one of: seat, package, topup, invoice'
+      });
+    }
+    order.type = type;
+  }
+  
+  // 更新支付方式
+  if (paymentMethod) {
+    if (!['alipay', 'wechat', 'bank_transfer', 'coupon'].includes(paymentMethod)) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: 'Invalid payment method. Must be one of: alipay, wechat, bank_transfer, coupon'
+      });
+    }
+    order.paymentMethod = paymentMethod;
+  }
+  
+  // 更新订单项
+  if (items && Array.isArray(items) && items.length > 0) {
+    // 验证每个订单项
+    for (const item of items) {
+      if (!item.name || typeof item.name !== 'string') {
+        return res.status(400).json({
+          success: false,
+          code: 400,
+          message: 'Each item must have a valid name'
+        });
+      }
+      if (!item.quantity || item.quantity <= 0) {
+        return res.status(400).json({
+          success: false,
+          code: 400,
+          message: 'Each item must have a quantity greater than 0'
+        });
+      }
+      if (!item.unitPrice || item.unitPrice <= 0) {
+        return res.status(400).json({
+          success: false,
+          code: 400,
+          message: 'Each item must have a unit price greater than 0'
+        });
+      }
+    }
+    
+    order.items = items.map((item) => ({
+      ...item,
+      id: 'item-' + uuidv4().slice(0, 8),
+      totalPrice: item.quantity * item.unitPrice
+    }));
+    
+    // 重新计算总金额
+    order.totalAmount = order.items.reduce((sum, item) => sum + item.totalPrice, 0);
+  }
+  
+  // 更新关联的企业名称
+  const tenant = mockTenants.find(t => t.id === order.tenantId);
+  if (tenant) {
+    order.tenantName = tenant.name;
+  }
+  
+  res.json({
+    success: true,
+    code: 200,
+    message: 'Order updated successfully',
+    data: order
   });
 });
 
