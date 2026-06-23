@@ -27,6 +27,25 @@ export interface SimpleResponse<T = unknown> {
   statusText: string;
 }
 
+// 安全序列化函数，避免循环引用
+const safeStringify = (obj: any): string => {
+  try {
+    // 只提取关键信息，避免循环引用
+    if (obj && typeof obj === 'object') {
+      const safeObj: any = {};
+      for (const key in obj) {
+        if (key !== 'req' && key !== 'res' && typeof obj[key] !== 'function') {
+          safeObj[key] = obj[key];
+        }
+      }
+      return JSON.stringify(safeObj);
+    }
+    return JSON.stringify(obj);
+  } catch (e) {
+    return '[无法序列化]';
+  }
+};
+
 export class HttpClient {
   private axiosInstance: AxiosInstance;
   private token: string = '';
@@ -50,26 +69,22 @@ export class HttpClient {
           config.headers.Authorization = `Bearer ${this.token}`;
         }
 
-        // 详细的请求日志
+        // 简化的请求日志，避免序列化复杂对象
         const fullUrl = `${envConfig.baseUrl}${config.url}`;
-        logger.info(`📤 [REQUEST] === ${config.method?.toUpperCase()} ${fullUrl}`);
-        logger.info(`   ├─ Headers: ${JSON.stringify(config.headers)}`);
+        logger.info(`📤 [REQUEST] ${config.method?.toUpperCase()} ${fullUrl}`);
         
         if (config.params) {
-          logger.info(`   ├─ Params: ${JSON.stringify(config.params)}`);
+          logger.info(`   Params: ${JSON.stringify(config.params)}`);
         }
         
         if (config.data) {
-          logger.info(`   ├─ Body: ${JSON.stringify(config.data)}`);
+          logger.info(`   Body: ${JSON.stringify(config.data)}`);
         }
-        
-        logger.info(`   └─ Timeout: ${TEST_TIMEOUT}ms`);
 
         return config;
       },
       (error) => {
-        logger.error(`❌ [REQUEST ERROR] === ${error.message}`);
-        logger.error(`   └─ Details: ${JSON.stringify(error)}`);
+        logger.error(`❌ [REQUEST ERROR] ${error.message}`);
         return Promise.reject(error);
       }
     );
@@ -79,13 +94,9 @@ export class HttpClient {
         const startTime = response.config.meta?.startTime || Date.now();
         const duration = Date.now() - startTime;
 
-        // 详细的响应日志
-        logger.info(`📥 [RESPONSE] === ${response.status} ${response.statusText}`);
-        logger.info(`   ├─ URL: ${response.config.url}`);
-        logger.info(`   ├─ Status: ${response.status} (${response.statusText})`);
-        logger.info(`   ├─ Duration: ${duration}ms`);
-        logger.info(`   ├─ Headers: ${JSON.stringify(response.headers)}`);
-        logger.info(`   └─ Data: ${JSON.stringify(response.data)}`);
+        // 简化的响应日志
+        logger.info(`📥 [RESPONSE] ${response.status} ${response.config.url} (${duration}ms)`);
+        logger.info(`   Data: ${JSON.stringify(response.data)}`);
 
         return response;
       },
@@ -93,22 +104,13 @@ export class HttpClient {
         const startTime = error.config?.meta?.startTime || Date.now();
         const duration = Date.now() - startTime;
         
-        // 详细的错误日志
-        logger.error(`❌ [RESPONSE ERROR] === ${error.response?.status || error.code} ${error.message}`);
-        logger.error(`   ├─ URL: ${error.config?.url}`);
-        logger.error(`   ├─ Method: ${error.config?.method?.toUpperCase()}`);
-        logger.error(`   ├─ Duration: ${duration}ms`);
+        // 简化的错误日志
+        logger.error(`❌ [RESPONSE ERROR] ${error.response?.status || error.code} ${error.config?.url} (${duration}ms)`);
         
-        if (error.response) {
-          logger.error(`   ├─ Status: ${error.response.status}`);
-          logger.error(`   ├─ Headers: ${JSON.stringify(error.response.headers)}`);
-          logger.error(`   ├─ Data: ${JSON.stringify(error.response.data)}`);
-          logger.error(`   └─ Status Text: ${error.response.statusText}`);
-        } else if (error.request) {
-          logger.error(`   ├─ Request: ${JSON.stringify(error.request)}`);
-          logger.error(`   └─ Note: 请求已发送但未收到响应（可能是网络问题或后端超时）`);
-        } else {
-          logger.error(`   └─ Config Error: ${error.message}`);
+        if (error.response?.data) {
+          logger.error(`   Error: ${JSON.stringify(error.response.data)}`);
+        } else if (error.message) {
+          logger.error(`   Message: ${error.message}`);
         }
 
         return Promise.reject(error);
