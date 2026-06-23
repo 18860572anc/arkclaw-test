@@ -136,6 +136,56 @@ const mockOrders = [
   }
 ];
 
+// Mock users for authentication
+const mockUsers = [
+  { id: 'user-001', phone: '17630059309', password: '12345qwe', role: 'officialAdmin', name: '官方管理员' },
+  { id: 'user-002', phone: '17726625243', password: '12345qwe', role: 'business', name: '商务人员' },
+  { id: 'user-003', phone: '15035948715', password: '12345qwe', role: 'opsAdmin', name: '交付运维管理员' },
+  { id: 'user-004', phone: '15266352635', password: '12345qwe', role: 'ops', name: '交付运维' },
+  { id: 'user-005', phone: '18899283726', password: '12345qwe', role: 'finance', name: '财务人员' },
+  { id: 'user-006', phone: '17772627362', password: '12345qwe', role: 'tenantAdmin', name: '企业客户管理员' },
+  { id: 'user-007', phone: '19902928273', password: '12345qwe', role: 'tenantAdmin', name: '镜像站客户管理员' },
+];
+
+// Auth API - Login
+app.post('/api/auth/login', (req, res) => {
+  const { username, password, domain } = req.body;
+  
+  if (!username || !password) {
+    return res.status(400).json({
+      success: false,
+      code: 400,
+      message: 'Username and password are required'
+    });
+  }
+  
+  const user = mockUsers.find(u => u.phone === username && u.password === password);
+  
+  if (user) {
+    res.json({
+      success: true,
+      code: 200,
+      message: 'Login successful',
+      data: {
+        token: 'mock-token-' + user.id + '-' + Date.now(),
+        user: {
+          id: user.id,
+          phone: user.phone,
+          name: user.name,
+          role: user.role
+        },
+        domain: domain || 'localhost'
+      }
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      code: 401,
+      message: 'Invalid username or password'
+    });
+  }
+});
+
 // Tenants API
 app.get('/api/tenants', (req, res) => {
   const page = parseInt(req.query.page) || 1;
