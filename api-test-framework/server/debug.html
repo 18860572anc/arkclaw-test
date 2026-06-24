@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug API Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .endpoint-card { border: 1px solid #ccc; padding: 15px; margin: 10px 0; }
+    .test-btn { background: #007bff; color: white; border: none; padding: 8px 16px; cursor: pointer; }
+    .response-area { background: #f8f9fa; padding: 10px; margin-top: 10px; display: none; }
+    .success { border-left: 4px solid green; }
+    .error { border-left: 4px solid red; }
+  </style>
+</head>
+<body>
+  <h1>调试页面</h1>
+  
+  <div class="endpoint-card" data-api='{"method":"GET","url":"/health"}'>
+    <button class="test-btn">测试 /health</button>
+    <div class="response-area"></div>
+  </div>
+
+  <div class="endpoint-card" data-api='{"method":"GET","url":"/api/orders"}'>
+    <button class="test-btn">测试 /api/orders</button>
+    <div class="response-area"></div>
+  </div>
+
+  <div id="logs"></div>
+
+  <script>
+    function log(msg) {
+      var logs = document.getElementById('logs');
+      logs.innerHTML += '<p>' + new Date().toLocaleTimeString() + ': ' + msg + '</p>';
+      console.log(msg);
+    }
+
+    log('页面加载开始');
+
+    document.addEventListener('DOMContentLoaded', function() {
+      log('DOM 加载完成');
+      
+      var buttons = document.querySelectorAll('.test-btn');
+      log('找到按钮数量: ' + buttons.length);
+      
+      buttons.forEach(function(button, index) {
+        log('绑定按钮 ' + index);
+        button.addEventListener('click', handleTestClick);
+      });
+    });
+
+    async function handleTestClick(event) {
+      log('按钮点击事件触发');
+      
+      var button = event.target;
+      log('按钮元素: ' + button.tagName);
+      
+      var card = button.closest('.endpoint-card');
+      log('卡片元素: ' + (card ? '找到' : '未找到'));
+      
+      if (!card) {
+        log('错误：找不到卡片');
+        return;
+      }
+      
+      var apiConfig = card.getAttribute('data-api');
+      log('API配置: ' + apiConfig);
+      
+      var config;
+      try {
+        config = JSON.parse(apiConfig);
+        log('解析成功: ' + JSON.stringify(config));
+      } catch (e) {
+        log('解析失败: ' + e.message);
+        return;
+      }
+      
+      var responseDiv = card.querySelector('.response-area');
+      if (!responseDiv) {
+        responseDiv = document.createElement('div');
+        responseDiv.className = 'response-area';
+        card.appendChild(responseDiv);
+      }
+      
+      responseDiv.style.display = 'block';
+      responseDiv.innerHTML = '正在请求...';
+      
+      try {
+        var options = {
+          method: config.method,
+          headers: { 'Content-Type': 'application/json' }
+        };
+        
+        if (config.body) {
+          options.body = JSON.stringify(config.body);
+        }
+        
+        log('发起请求: ' + config.method + ' ' + config.url);
+        var response = await fetch(config.url, options);
+        log('响应状态: ' + response.status);
+        
+        var data = await response.json();
+        log('响应数据长度: ' + JSON.stringify(data).length);
+        
+        responseDiv.className = 'response-area ' + (response.ok ? 'success' : 'error');
+        responseDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+      } catch (error) {
+        log('请求异常: ' + error.message);
+        responseDiv.className = 'response-area error';
+        responseDiv.innerHTML = '错误: ' + error.message;
+      }
+    }
+  </script>
+</body>
+</html>

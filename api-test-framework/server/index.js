@@ -696,6 +696,313 @@ app.post('/api/orders/:id/activate', (req, res) => {
   }
 });
 
+// Home page - API documentation and test interface
+app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.send(`
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArkClaw Mock Server API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; color: white; margin-bottom: 30px; }
+    header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+    header p { opacity: 0.9; }
+    .status-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+    .api-section {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .api-section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+    }
+    .endpoint-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+    }
+    .endpoint-card:hover { border-color: #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15); }
+    .method-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-right: 10px;
+      text-transform: uppercase;
+    }
+    .method-get { background: #4CAF50; color: white; }
+    .method-post { background: #2196F3; color: white; }
+    .method-put { background: #FF9800; color: white; }
+    .method-delete { background: #f44336; color: white; }
+    .endpoint-url {
+      font-family: 'Monaco', 'Consolas', monospace;
+      color: #333;
+      font-size: 1rem;
+    }
+    .endpoint-desc { margin-top: 8px; color: #666; font-size: 0.9rem; }
+    .test-btn {
+      float: right;
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+    .test-btn:hover { background: #5a6fd6; transform: translateY(-1px); }
+    .test-btn:active { transform: translateY(0); }
+    .response-area {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .response-area.success { border-left: 4px solid #4CAF50; }
+    .response-area.error { border-left: 4px solid #f44336; }
+    .response-area pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+    footer { text-align: center; color: white; opacity: 0.8; margin-top: 30px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ArkClaw Mock Server</h1>
+      <p>API 接口测试平台</p>
+      <span class="status-badge">✅ 服务器运行中</span>
+    </header>
+
+    <div class="api-section">
+      <h2>📊 健康检查</h2>
+      <div class="endpoint-card" data-api='{"method":"GET","url":"/health"}'>
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-url">/health</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">检查服务器运行状态</div>
+      </div>
+    </div>
+
+    <div class="api-section">
+      <h2>🏢 企业管理 API</h2>
+      <div class="endpoint-card" data-api='{"method":"GET","url":"/api/tenants"}'>
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-url">/api/tenants</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">获取企业列表（支持分页: ?page=1&pageSize=20）</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"GET","url":"/api/tenants/tenant-001"}'>
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-url">/api/tenants/:id</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">获取企业详情</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"POST","url":"/api/tenants","body":{"name":"测试企业","uscc":"91310101MA12345678","adminName":"管理员","adminPhone":"13800138000"}}'>
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-url">/api/tenants</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">创建新企业</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"PUT","url":"/api/tenants/tenant-001","body":{"name":"更新后的企业名称"}}'>
+        <span class="method-badge method-put">PUT</span>
+        <span class="endpoint-url">/api/tenants/:id</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">更新企业信息</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"DELETE","url":"/api/tenants/tenant-001"}'>
+        <span class="method-badge method-delete">DELETE</span>
+        <span class="endpoint-url">/api/tenants/:id</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">删除企业</div>
+      </div>
+    </div>
+
+    <div class="api-section">
+      <h2>📦 订单管理 API</h2>
+      <div class="endpoint-card" data-api='{"method":"GET","url":"/api/orders"}'>
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-url">/api/orders</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">获取订单列表（支持分页和状态筛选）</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"GET","url":"/api/orders/order-001"}'>
+        <span class="method-badge method-get">GET</span>
+        <span class="endpoint-url">/api/orders/:id</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">获取订单详情</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"POST","url":"/api/orders","body":{"tenantId":"tenant-001","type":"seat","paymentMethod":"bank_transfer","items":[{"name":"席位","quantity":10,"unitPrice":1000}]}}'>
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-url">/api/orders</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">创建订单</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"POST","url":"/api/orders/order-001/confirm-payment","body":{"actualAmount":10000}}'>
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-url">/api/orders/:id/confirm-payment</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">确认支付</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"POST","url":"/api/orders/order-002/activate"}'>
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-url">/api/orders/:id/activate</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">开通服务</div>
+      </div>
+      <div class="endpoint-card" data-api='{"method":"POST","url":"/api/orders/order-003/cancel"}'>
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-url">/api/orders/:id/cancel</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">取消订单</div>
+      </div>
+    </div>
+
+    <div class="api-section">
+      <h2>🔐 用户认证 API</h2>
+      <div class="endpoint-card" data-api='{"method":"POST","url":"/api/auth/login","body":{"username":"17630059309","password":"12345qwe","domain":"localhost"}}'>
+        <span class="method-badge method-post">POST</span>
+        <span class="endpoint-url">/api/auth/login</span>
+        <button class="test-btn" onclick="testApi(this)">测试</button>
+        <div class="endpoint-desc">用户登录（支持多种角色）</div>
+      </div>
+    </div>
+
+    <footer>
+      <p>ArkClaw Mock Server v1.0 | 基于 Express 构建</p>
+    </footer>
+  </div>
+
+  <script>
+    console.log('页面加载完成');
+
+    async function testApi(button) {
+      console.log('按钮被点击');
+      
+      // 获取按钮所在的卡片
+      const endpointCard = button.closest('.endpoint-card');
+      console.log('找到卡片:', endpointCard);
+      
+      // 获取 API 配置
+      const apiConfig = endpointCard.getAttribute('data-api');
+      console.log('API 配置:', apiConfig);
+      
+      let config;
+      try {
+        config = JSON.parse(apiConfig);
+      } catch (e) {
+        console.error('解析配置失败:', e);
+        alert('配置解析错误');
+        return;
+      }
+      
+      const { method, url, body } = config;
+      console.log('准备请求:', method, url);
+      
+      // 创建或获取响应显示区域
+      let responseDiv = endpointCard.querySelector('.response-area');
+      if (!responseDiv) {
+        responseDiv = document.createElement('div');
+        responseDiv.className = 'response-area';
+        responseDiv.style.display = 'block';
+        responseDiv.style.marginTop = '12px';
+        responseDiv.style.padding = '12px';
+        responseDiv.style.background = '#f8f9fa';
+        responseDiv.style.borderRadius = '8px';
+        responseDiv.style.maxHeight = '300px';
+        responseDiv.style.overflowY = 'auto';
+        responseDiv.style.fontFamily = 'Monaco, Consolas, monospace';
+        responseDiv.style.fontSize = '0.85rem';
+        endpointCard.appendChild(responseDiv);
+      }
+      
+      responseDiv.innerHTML = '<pre>正在请求...</pre>';
+      responseDiv.className = 'response-area';
+      
+      try {
+        const options = {
+          method: method,
+          headers: { 'Content-Type': 'application/json' }
+        };
+        
+        if (body) {
+          options.body = JSON.stringify(body);
+        }
+        
+        console.log('发起请求:', method, url);
+        const response = await fetch(url, options);
+        console.log('响应状态:', response.status);
+        const data = await response.json();
+        console.log('响应数据:', data);
+        
+        if (response.ok) {
+          responseDiv.className = 'response-area success';
+          responseDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        } else {
+          responseDiv.className = 'response-area error';
+          responseDiv.innerHTML = '<pre>状态码: ' + response.status + '\\n' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+      } catch (error) {
+        console.error('请求失败:', error);
+        responseDiv.className = 'response-area error';
+        responseDiv.innerHTML = '<pre>错误: ' + error.message + '</pre>';
+      }
+    }
+  </script>
+</body>
+</html>
+  `);
+});
+
+// Debug page route
+app.get('/debug', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const debugHtml = fs.readFileSync(path.join(__dirname, 'debug.html'), 'utf8');
+  res.setHeader('Content-Type', 'text/html');
+  res.send(debugHtml);
+});
+
+// Simple test page
+app.get('/simple', (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const simpleHtml = fs.readFileSync(path.join(__dirname, 'simple-test.html'), 'utf8');
+  res.setHeader('Content-Type', 'text/html');
+  res.send(simpleHtml);
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({

@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>主站接口测试平台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+    .header {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+    .header p { opacity: 0.7; font-size: 0.9rem; }
+    
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1rem;
+    }
+    .tab.active { background: #00d4ff; color: #1a1a2e; }
+    .tab:hover { background: rgba(255,255,255,0.2); }
+    
+    .section { display: none; }
+    .section.active { display: block; }
+    
+    .api-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 20px;
+    }
+    
+    .api-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s;
+    }
+    .api-card:hover { border-color: #00d4ff; }
+    
+    .api-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .method {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .method.GET { background: #4CAF50; }
+    .method.POST { background: #2196F3; }
+    .method.PUT { background: #FF9800; }
+    .method.DELETE { background: #f44336; }
+    
+    .api-url { font-family: monospace; font-size: 0.95rem; }
+    
+    .api-desc { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 15px; }
+    
+    .test-btn {
+      background: #00d4ff;
+      color: #1a1a2e;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .test-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,212,255,0.4); }
+    
+    .response-area {
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .response-area.success { border-left: 4px solid #4CAF50; }
+    .response-area.error { border-left: 4px solid #f44336; }
+    
+    .flow-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .flow-card h3 { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    .flow-card h3 span { font-size: 0.8rem; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 4px; }
+    
+    .flow-steps { margin-bottom: 15px; }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      margin: 5px 0;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+    }
+    
+    .run-flow-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    .run-flow-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
+    
+    .flow-results {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+    }
+    
+    .result-item {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    .result-item.success { background: rgba(76,175,80,0.2); border-left: 4px solid #4CAF50; }
+    .result-item.failed { background: rgba(244,67,54,0.2); border-left: 4px solid #f44336; }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card .value { font-size: 2rem; font-weight: 700; }
+    .stat-card .label { font-size: 0.9rem; opacity: 0.7; margin-top: 5px; }
+    
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filter-bar select, .filter-bar input {
+      padding: 10px 15px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      color: #fff;
+    }
+    .filter-bar button {
+      padding: 10px 20px;
+      background: #00d4ff;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>主站接口测试平台</h1>
+    <p>API接口检测与功能测试流程</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('api-test')">API接口检测</button>
+      <button class="tab" onclick="showTab('flow-test')">功能测试流程</button>
+      <button class="tab" onclick="showTab('proxy-test')">主站代理测试</button>
+    </div>
+
+    <!-- API接口检测 -->
+    <div id="api-test" class="section active">
+      <div class="filter-bar">
+        <select id="api-category" onchange="filterApis()">
+          <option value="all">全部分类</option>
+          <option value="auth">认证</option>
+          <option value="tenants">企业管理</option>
+          <option value="orders">订单管理</option>
+          <option value="tickets">工单管理</option>
+          <option value="main">主站接口</option>
+          <option value="mirror">镜像站接口</option>
+        </select>
+        <input type="text" id="api-search" placeholder="搜索接口..." onkeyup="filterApis()">
+        <button onclick="runAllTests()">运行全部测试</button>
+      </div>
+      
+      <div class="api-grid" id="api-grid">
+      </div>
+    </div>
+
+    <!-- 功能测试流程 -->
+    <div id="flow-test" class="section">
+      <div class="stats" id="flow-stats">
+        <div class="stat-card"><div class="value" id="stat-total">0</div><div class="label">总步骤</div></div>
+        <div class="stat-card"><div class="value" id="stat-success">0</div><div class="label">成功</div></div>
+        <div class="stat-card"><div class="value" id="stat-failed">0</div><div class="label">失败</div></div>
+        <div class="stat-card"><div class="value" id="stat-rate">0%</div><div class="label">成功率</div></div>
+      </div>
+      
+      <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <h3 style="color: #fff; margin-bottom: 10px;">📋 主站业务流程（ArkClaw）</h3>
+        <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">企业注册/登录 → 席位购买 → 支付审核 → 开通服务 → 商务佣金结算</p>
+        <p style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">站点: claw-test-mirror2.brainlink.cloud | 官方管理员: 17630059309</p>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-企业注册流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 企业客户管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tenants - 创建企业信息（信用代码）</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders - 席位购买订单</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('register')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-register" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-微信/支付宝支付流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/pay - 微信/支付宝支付</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/activate - 交付运维直接开通</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('online-pay')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-online-pay" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-对公转账流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/pay - 对公转账</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/review - 交付运维初步审核</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/confirm - 财务人员确认</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/activate - 开通服务</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('bank-transfer')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-bank-transfer" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-商务佣金结算流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 商务人员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/commissions - 查询佣金</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/commissions/{id}/settle - 佣金结算</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('commission')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-commission" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-员工管理流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 官方管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/employees - 新增内部员工</span>
+          </div>
+          <div class="flow-step">
+            <span class="method PUT">PUT</span>
+            <span>/api/employees/{id} - 编辑员工信息</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/employees/{id}/set-admin - 设置商务管理员</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('employee')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-employee" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-优惠券流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 官方管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/coupons/template - 新增优惠券模板</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/coupons/{id}/issue - 发放优惠券</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/coupons/receive - 领取优惠券</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('coupon')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-coupon" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-佣金申请流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 商务人员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/bank-account - 编辑银行账户</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/commissions/{id}/apply - 申请佣金</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/commissions/{id}/pay - 财务发放</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('commission-apply')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-commission-apply" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-发票申请流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 企业客户管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/invoices - 申请发票</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/invoices/{id}/issue - 财务开票</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('invoice')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-invoice" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-工单咨询流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 企业客户管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets - 创建工单（席位套餐）</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets/{id}/assign - 分配工单</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets/{id}/resolve - 解决工单</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('ticket')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-ticket" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>主站-交付运维流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 交付运维管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets/all - 查看所有工单</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets/{id}/review - 审核工单</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets/{id}/forward - 流转财务人员</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMainSiteFlow('delivery')">运行流程</button>
+        <div class="flow-results" id="flow-result-main-delivery" style="display:none;"></div>
+      </div>
+      
+      <div style="background: linear-gradient(135deg, #4a2c6a 0%, #6b4d9e 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; margin-top: 30px;">
+        <h3 style="color: #fff; margin-bottom: 10px;">🔄 镜像站业务流程（外部代理）</h3>
+        <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">镜像站企业注册购买 → 镜像站财务审核 → 官方管理员采购 → 主站处理（微信/支付宝直接开通，对公转账需审核）</p>
+        <p style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">站点: claw-test-mirror.brainlink.cloud | 客户管理员: 19902928273</p>
+      </div>
+      
+      <div class="flow-card">
+        <h3>镜像站-企业注册流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 镜像站客户管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tenants - 创建镜像站企业</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders - 镜像站席位订单</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMirrorSiteFlow('register')">运行流程</button>
+        <div class="flow-results" id="flow-result-mirror-register" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>镜像站-微信/支付宝支付流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 镜像站财务登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/audit - 镜像站财务审核</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 官方管理员登录（主站）</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/purchase - 官方管理员采购</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/activate - 主站直接开通</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMirrorSiteFlow('online-pay')">运行流程</button>
+        <div class="flow-results" id="flow-result-mirror-online-pay" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>镜像站-对公转账流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 镜像站财务登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/audit - 镜像站财务审核</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 官方管理员登录（主站）</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/purchase - 官方管理员采购</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/pay - 主站对公转账</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/review - 主站交付运维审核</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/confirm - 主站财务确认</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/activate - 开通服务</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMirrorSiteFlow('bank-transfer')">运行流程</button>
+        <div class="flow-results" id="flow-result-mirror-bank-transfer" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>镜像站-订单总览流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 镜像站官方管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/overview - 查看订单总览</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/pending - 选择待采购订单</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/orders/{id}/purchase - 执行采购</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMirrorSiteFlow('overview')">运行流程</button>
+        <div class="flow-results" id="flow-result-mirror-overview" style="display:none;"></div>
+      </div>
+      
+      <div class="flow-card">
+        <h3>镜像站-工单咨询流程 <span>POST</span></h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/auth/login - 镜像站企业客户管理员登录</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets - 创建工单（技术支持）</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets/{id}/assign - 分配工单</span>
+          </div>
+          <div class="flow-step">
+            <span class="method POST">POST</span>
+            <span>/api/tickets/{id}/resolve - 解决工单</span>
+          </div>
+        </div>
+        <button class="run-flow-btn" onclick="runMirrorSiteFlow('ticket')">运行流程</button>
+        <div class="flow-results" id="flow-result-mirror-ticket" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- 主站代理测试 -->
+    <div id="proxy-test" class="section">
+      <div style="margin-bottom: 20px;">
+        <label style="margin-right: 10px;">选择站点:</label>
+        <select id="site-select" style="padding: 10px 15px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff;">
+          <option value="mirror1">mirror1 - 外部代理镜像站</option>
+          <option value="mirror2">mirror2 - 主站</option>
+        </select>
+      </div>
+      
+      <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <h3 style="color: #fff; margin-bottom: 10px;">📋 主站代理测试说明</h3>
+        <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">主站（mirror2）: claw-test-mirror2.brainlink.cloud | 外部代理镜像站（mirror1）: claw-test-mirror.brainlink.cloud</p>
+        <p style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">主站企业账号: 17772627362 | 镜像站企业账号: 17726263423 | 官方管理员: 17630059309</p>
+      </div>
+      
+      <div class="api-grid">
+        <div class="api-card">
+          <div class="api-header">
+            <span class="method GET">GET</span>
+            <span class="api-url">/proxy/{site}/</span>
+          </div>
+          <div class="api-desc">站点首页（验证代理连接）</div>
+          <button class="test-btn" onclick="testProxy('/', 'GET')">测试</button>
+          <div class="response-area" id="proxy--result"></div>
+        </div>
+        
+        <div class="api-card">
+          <div class="api-header">
+            <span class="method POST">POST</span>
+            <span class="api-url">/proxy/{site}/api/auth/login</span>
+          </div>
+          <div class="api-desc">主站企业客户管理员登录 (17772627362) - 适用于 mirror2</div>
+          <button class="test-btn" onclick="testLogin('17772627362')">测试</button>
+          <div class="response-area" id="proxy-auth-login-result"></div>
+        </div>
+        
+        <div class="api-card">
+          <div class="api-header">
+            <span class="method POST">POST</span>
+            <span class="api-url">/proxy/{site}/api/auth/login</span>
+          </div>
+          <div class="api-desc">镜像站企业客户管理员登录 (17726263423) - 适用于 mirror1</div>
+          <button class="test-btn" onclick="testLogin('17726263423')">测试</button>
+          <div class="response-area" id="proxy-auth-login-mirror-result"></div>
+        </div>
+        
+        <div class="api-card">
+          <div class="api-header">
+            <span class="method POST">POST</span>
+            <span class="api-url">/proxy/{site}/api/auth/login</span>
+          </div>
+          <div class="api-desc">官方管理员登录 (17630059309) - 适用于 mirror2</div>
+          <button class="test-btn" onclick="testLogin('17630059309')">测试</button>
+          <div class="response-area" id="proxy-auth-login-admin-result"></div>
+        </div>
+        
+        <div class="api-card">
+          <div class="api-header">
+            <span class="method GET">GET</span>
+            <span class="api-url">/health</span>
+          </div>
+          <div class="api-desc">本地服务器健康检查</div>
+          <button class="test-btn" onclick="testLocal('/health', 'GET')">测试</button>
+          <div class="response-area" id="local-health-result"></div>
+        </div>
+        
+        <div class="api-card">
+          <div class="api-header">
+            <span class="method GET">GET</span>
+            <span class="api-url">/api/tenants</span>
+          </div>
+          <div class="api-desc">本地模拟接口 - 获取企业列表</div>
+          <button class="test-btn" onclick="testLocal('/api/tenants', 'GET')">测试</button>
+          <div class="response-area" id="local-tenants-result"></div>
+        </div>
+        
+        <div class="api-card">
+          <div class="api-header">
+            <span class="method GET">GET</span>
+            <span class="api-url">/api/orders</span>
+          </div>
+          <div class="api-desc">本地模拟接口 - 获取订单列表</div>
+          <button class="test-btn" onclick="testLocal('/api/orders', 'GET')">测试</button>
+          <div class="response-area" id="local-orders-result"></div>
+        </div>
+        
+        <div class="api-card">
+          <div class="api-header">
+            <span class="method POST">POST</span>
+            <span class="api-url">/api/tickets</span>
+          </div>
+          <div class="api-desc">本地模拟接口 - 创建工单</div>
+          <button class="test-btn" onclick="testLocal('/api/tickets', 'POST', { type: 'seat_package', title: '咨询席位套餐', content: '测试工单' })">测试</button>
+          <div class="response-area" id="local-tickets-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiList = [
+      // 系统接口
+      { method: 'GET', url: '/health', desc: '健康检查', category: 'system' },
+      
+      // 认证接口
+      { method: 'POST', url: '/api/auth/login', desc: '用户登录（官方管理员）', category: 'auth', body: { username: '17630059309', password: '12345qwe' } },
+      { method: 'POST', url: '/api/auth/login', desc: '用户登录（主站企业）', category: 'auth', body: { username: '17772627362', password: '12345qwe' } },
+      { method: 'POST', url: '/api/auth/login', desc: '用户登录（镜像站企业）', category: 'auth', body: { username: '17726263423', password: '12345qwe' } },
+      
+      // 企业管理接口
+      { method: 'GET', url: '/api/tenants', desc: '获取企业列表', category: 'tenants' },
+      { method: 'GET', url: '/api/tenants/tenant-001', desc: '获取企业详情', category: 'tenants' },
+      { method: 'POST', url: '/api/tenants', desc: '创建企业', category: 'tenants', body: { name: '新企业', uscc: '91310101MA12345678', adminPhone: '13800138000' } },
+      
+      // 订单管理接口
+      { method: 'GET', url: '/api/orders', desc: '获取订单列表', category: 'orders' },
+      { method: 'GET', url: '/api/orders/order-001', desc: '获取订单详情', category: 'orders' },
+      { method: 'POST', url: '/api/orders', desc: '创建订单', category: 'orders', body: { tenantId: 'tenant-001', type: 'seat', paymentMethod: 'bank_transfer', items: [{ name: '席位', quantity: 5, unitPrice: 1000 }] } },
+      { method: 'POST', url: '/api/orders/order-001/pay', desc: '订单支付', category: 'orders', body: { paymentMethod: 'wechat', amount: 5000 } },
+      { method: 'POST', url: '/api/orders/order-001/review', desc: '订单审核（交付运维）', category: 'orders', body: { reviewResult: 'approved' } },
+      { method: 'POST', url: '/api/orders/order-001/confirm', desc: '订单确认（财务）', category: 'orders', body: { confirmResult: 'confirmed' } },
+      { method: 'POST', url: '/api/orders/order-001/activate', desc: '开通服务', category: 'orders' },
+      { method: 'POST', url: '/api/orders/order-001/purchase', desc: '官方管理员采购', category: 'orders', body: { purchaseResult: 'approved' } },
+      { method: 'POST', url: '/api/orders/order-001/audit', desc: '镜像站财务审核', category: 'orders', body: { auditResult: 'approved' } },
+      { method: 'POST', url: '/api/orders/overview', desc: '订单总览', category: 'orders' },
+      { method: 'POST', url: '/api/orders/pending', desc: '待采购订单', category: 'orders' },
+      
+      // 工单管理接口
+      { method: 'POST', url: '/api/tickets', desc: '创建工单', category: 'tickets', body: { type: 'seat_package', title: '咨询席位套餐', content: '咨询企业版席位套餐详情' } },
+      { method: 'POST', url: '/api/tickets/all', desc: '查看所有工单（交付运维管理员）', category: 'tickets' },
+      { method: 'POST', url: '/api/tickets/ticket-001/assign', desc: '分配工单', category: 'tickets', body: { assigneeId: 'delivery-001' } },
+      { method: 'POST', url: '/api/tickets/ticket-001/review', desc: '审核工单', category: 'tickets', body: { reviewResult: 'approved' } },
+      { method: 'POST', url: '/api/tickets/ticket-001/forward', desc: '流转工单', category: 'tickets', body: { targetRole: 'finance' } },
+      { method: 'POST', url: '/api/tickets/ticket-001/resolve', desc: '解决工单', category: 'tickets', body: { resolution: '已解答客户咨询' } },
+      
+      // 主站接口
+      { method: 'POST', url: '/proxy/mirror2/api/auth/login', desc: '主站企业客户管理员登录', category: 'main', body: { username: '17772627362', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+      { method: 'POST', url: '/proxy/mirror2/api/auth/login', desc: '主站官方管理员登录', category: 'main', body: { username: '17630059309', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+      { method: 'POST', url: '/proxy/mirror2/api/tenants', desc: '主站创建企业', category: 'main', body: { name: '主站测试企业', uscc: '91310101MA99999999', adminPhone: '13900139000' } },
+      { method: 'POST', url: '/proxy/mirror2/api/orders', desc: '主站创建订单', category: 'main', body: { tenantId: 'tenant-001', type: 'seat', paymentMethod: 'wechat', totalAmount: 10000 } },
+      
+      // 镜像站接口
+      { method: 'POST', url: '/proxy/mirror1/api/auth/login', desc: '镜像站企业客户管理员登录', category: 'mirror', body: { username: '17726263423', password: '12345qwe', domain: 'claw-test-mirror.brainlink.cloud' } },
+      { method: 'POST', url: '/proxy/mirror1/api/tenants', desc: '镜像站创建企业', category: 'mirror', body: { name: '镜像站测试企业', uscc: '91310101MA88888888', adminPhone: '13800138000' } },
+      { method: 'POST', url: '/proxy/mirror1/api/orders', desc: '镜像站创建订单', category: 'mirror', body: { tenantId: 'tenant-002', type: 'seat', paymentMethod: 'wechat', totalAmount: 5000 } },
+      { method: 'POST', url: '/proxy/mirror1/api/tickets', desc: '镜像站创建工单', category: 'mirror', body: { type: 'tech_support', title: '技术支持', content: '需要技术支持' } },
+    ];
+
+    function initApiGrid() {
+      const grid = document.getElementById('api-grid');
+      apiList.forEach((api, index) => {
+        const card = document.createElement('div');
+        card.className = 'api-card';
+        card.dataset.category = api.category;
+        card.innerHTML = `
+          <div class="api-header">
+            <span class="method ${api.method}">${api.method}</span>
+            <span class="api-url">${api.url}</span>
+          </div>
+          <div class="api-desc">${api.desc}</div>
+          <button class="test-btn" onclick="testApi(${index})">测试</button>
+          <div class="response-area" id="api-${index}-result"></div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function showTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+    }
+
+    function filterApis() {
+      const category = document.getElementById('api-category').value;
+      const search = document.getElementById('api-search').value.toLowerCase();
+      
+      document.querySelectorAll('.api-card').forEach(card => {
+        const matchesCategory = category === 'all' || card.dataset.category === category;
+        const matchesSearch = search === '' || card.textContent.toLowerCase().includes(search);
+        card.style.display = matchesCategory && matchesSearch ? 'block' : 'none';
+      });
+    }
+
+    async function testApi(index) {
+      const api = apiList[index];
+      const resultDiv = document.getElementById(`api-${index}-result`);
+      const btn = event.target;
+      
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'response-area';
+      resultDiv.innerHTML = '<pre>正在请求...</pre>';
+      btn.disabled = true;
+      
+      try {
+        const options = { method: api.method, headers: { 'Content-Type': 'application/json' } };
+        if (api.body) options.body = JSON.stringify(api.body);
+        
+        const response = await fetch(api.url, options);
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.className = 'response-area success';
+          resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        } else {
+          resultDiv.className = 'response-area error';
+          resultDiv.innerHTML = '<pre>状态码: ' + response.status + '\\n' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+      } catch (error) {
+        resultDiv.className = 'response-area error';
+        resultDiv.innerHTML = '<pre>错误: ' + error.message + '</pre>';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function runAllTests() {
+      for (let i = 0; i < apiList.length; i++) {
+        await testApi(i);
+        await new Promise(r => setTimeout(r, 300));
+      }
+    }
+
+    async function runFlow(flowId) {
+      const flows = {
+        1: [
+          { name: '创建企业', method: 'POST', url: '/api/tenants', body: { name: '测试企业', uscc: '91310101MA12345678', adminPhone: '13800138000' } },
+          { name: '创建订单', method: 'POST', url: '/api/orders', body: { tenantId: 'tenant-001', type: 'seat', paymentMethod: 'bank_transfer' } }
+        ],
+        2: [
+          { name: '确认支付', method: 'POST', url: '/api/orders/order-003/confirm-payment', body: { actualAmount: 5000 } },
+          { name: '开通服务', method: 'POST', url: '/api/orders/order-003/activate' }
+        ],
+        3: [
+          { name: '用户登录', method: 'POST', url: '/api/auth/login', body: { username: '17630059309', password: '12345qwe' } }
+        ]
+      };
+      
+      const steps = flows[flowId];
+      const resultsDiv = document.getElementById(`flow-result-${flowId}`);
+      resultsDiv.style.display = 'block';
+      resultsDiv.innerHTML = '<div style="color:#00d4ff;">正在执行流程...</div>';
+      
+      const results = [];
+      for (const step of steps) {
+        try {
+          const options = { method: step.method, headers: { 'Content-Type': 'application/json' } };
+          if (step.body) options.body = JSON.stringify(step.body);
+          
+          const response = await fetch(step.url, options);
+          const data = await response.json();
+          
+          results.push({ step: step.name, status: response.ok ? 'success' : 'failed', statusCode: response.status, data });
+        } catch (error) {
+          results.push({ step: step.name, status: 'failed', statusCode: 500, error: error.message });
+        }
+      }
+      
+      displayFlowResults(resultsDiv, results);
+      updateStats(results);
+    }
+    
+    async function runMainSiteFlow(type) {
+      const resultsDiv = document.getElementById(`flow-result-main-${type}`);
+      resultsDiv.style.display = 'block';
+      resultsDiv.innerHTML = '<div style="color:#00d4ff;">正在执行主站业务流程...</div>';
+      
+      const steps = {
+        'register': [
+          { name: '主站企业客户管理员登录', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17772627362', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '创建企业信息（信用代码）', method: 'POST', url: '/api/tenants', body: { name: '主站测试企业', uscc: '91310101MA99999999', adminPhone: '13900139000' } },
+          { name: '席位购买订单', method: 'POST', url: '/api/orders', body: { tenantId: 'tenant-001', type: 'seat', paymentMethod: 'wechat', totalAmount: 10000 } }
+        ],
+        'online-pay': [
+          { name: '微信/支付宝支付', method: 'POST', url: '/api/orders/order-001/pay', body: { paymentMethod: 'wechat', amount: 10000 } },
+          { name: '交付运维直接开通', method: 'POST', url: '/api/orders/order-001/activate' }
+        ],
+        'bank-transfer': [
+          { name: '对公转账', method: 'POST', url: '/api/orders/order-002/pay', body: { paymentMethod: 'bank_transfer', amount: 50000 } },
+          { name: '交付运维初步审核', method: 'POST', url: '/api/orders/order-002/review', body: { reviewResult: 'approved' } },
+          { name: '财务人员确认', method: 'POST', url: '/api/orders/order-002/confirm', body: { confirmResult: 'confirmed' } },
+          { name: '开通服务', method: 'POST', url: '/api/orders/order-002/activate' }
+        ],
+        'commission': [
+          { name: '商务人员登录', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17726625243', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '查询佣金', method: 'POST', url: '/api/commissions', body: { businessId: 'business-001' } },
+          { name: '佣金结算', method: 'POST', url: '/api/commissions/comm-001/settle', body: { settleAmount: 5000 } }
+        ],
+        'employee': [
+          { name: '官方管理员登录', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17630059309', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '新增内部员工', method: 'POST', url: '/api/employees', body: { name: '测试员工', phone: '13500135000', role: 'business' } },
+          { name: '编辑员工信息', method: 'PUT', url: '/api/employees/emp-001', body: { name: '测试员工(已编辑)', role: 'business' } },
+          { name: '设置商务管理员', method: 'POST', url: '/api/employees/emp-001/set-admin', body: { isAdmin: true } }
+        ],
+        'coupon': [
+          { name: '官方管理员登录', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17630059309', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '新增优惠券模板', method: 'POST', url: '/api/coupons/template', body: { name: '满减券', discount: 100, minAmount: 1000 } },
+          { name: '发放优惠券', method: 'POST', url: '/api/coupons/coupon-001/issue', body: { targetType: 'business_admin', targetId: 'admin-001' } },
+          { name: '商务人员领取优惠券', method: 'POST', url: '/api/coupons/receive', body: { couponId: 'coupon-001', userId: 'business-001' } }
+        ],
+        'commission-apply': [
+          { name: '商务人员登录', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17726625243', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '编辑银行账户', method: 'POST', url: '/api/bank-account', body: { bankName: '中国银行', accountNo: '6222021234567890123' } },
+          { name: '申请佣金', method: 'POST', url: '/api/commissions/comm-001/apply', body: { applyAmount: 5000 } },
+          { name: '财务发放', method: 'POST', url: '/api/commissions/comm-001/pay', body: { payAmount: 5000 } }
+        ],
+        'invoice': [
+          { name: '企业客户管理员登录', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17772627362', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '申请发票', method: 'POST', url: '/api/invoices', body: { orderId: 'order-001', amount: 10000, type: 'vat' } },
+          { name: '财务开票', method: 'POST', url: '/api/invoices/invoice-001/issue', body: { invoiceNo: 'FP2024001', status: 'issued' } }
+        ],
+        'ticket': [
+          { name: '企业客户管理员登录', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17772627362', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '创建工单（席位套餐）', method: 'POST', url: '/api/tickets', body: { type: 'seat_package', title: '咨询席位套餐', content: '咨询企业版席位套餐详情' } },
+          { name: '分配工单', method: 'POST', url: '/api/tickets/ticket-001/assign', body: { assigneeId: 'delivery-001' } },
+          { name: '解决工单', method: 'POST', url: '/api/tickets/ticket-001/resolve', body: { resolution: '已解答客户咨询' } }
+        ],
+        'delivery': [
+          { name: '交付运维管理员登录', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17630059309', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '查看所有工单', method: 'POST', url: '/api/tickets/all', body: {} },
+          { name: '审核工单', method: 'POST', url: '/api/tickets/ticket-001/review', body: { reviewResult: 'approved' } },
+          { name: '流转财务人员', method: 'POST', url: '/api/tickets/ticket-001/forward', body: { targetRole: 'finance' } }
+        ]
+      };
+      
+      const results = await executeFlowSteps(steps[type]);
+      displayFlowResults(resultsDiv, results);
+      updateStats(results);
+    }
+    
+    async function runMirrorSiteFlow(type) {
+      const resultsDiv = document.getElementById(`flow-result-mirror-${type}`);
+      resultsDiv.style.display = 'block';
+      resultsDiv.innerHTML = '<div style="color:#00d4ff;">正在执行镜像站业务流程...</div>';
+      
+      const steps = {
+        'register': [
+          { name: '镜像站企业客户管理员登录', method: 'POST', url: '/proxy/mirror1/api/auth/login', body: { username: '17726263423', password: '12345qwe', domain: 'claw-test-mirror.brainlink.cloud' } },
+          { name: '创建镜像站企业', method: 'POST', url: '/api/tenants', body: { name: '镜像站测试企业', uscc: '91310101MA88888888', adminPhone: '13800138000' } },
+          { name: '镜像站席位订单', method: 'POST', url: '/api/orders', body: { tenantId: 'tenant-002', type: 'seat', paymentMethod: 'wechat', totalAmount: 5000 } }
+        ],
+        'online-pay': [
+          { name: '镜像站财务登录', method: 'POST', url: '/proxy/mirror1/api/auth/login', body: { username: '17726263423', password: '12345qwe', domain: 'claw-test-mirror.brainlink.cloud' } },
+          { name: '镜像站财务审核', method: 'POST', url: '/api/orders/order-003/audit', body: { auditResult: 'approved' } },
+          { name: '官方管理员登录（主站）', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17630059309', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '官方管理员采购', method: 'POST', url: '/api/orders/order-003/purchase', body: { purchaseResult: 'approved' } },
+          { name: '主站直接开通', method: 'POST', url: '/api/orders/order-003/activate' }
+        ],
+        'bank-transfer': [
+          { name: '镜像站财务登录', method: 'POST', url: '/proxy/mirror1/api/auth/login', body: { username: '17726263423', password: '12345qwe', domain: 'claw-test-mirror.brainlink.cloud' } },
+          { name: '镜像站财务审核', method: 'POST', url: '/api/orders/order-004/audit', body: { auditResult: 'approved' } },
+          { name: '官方管理员登录（主站）', method: 'POST', url: '/proxy/mirror2/api/auth/login', body: { username: '17630059309', password: '12345qwe', domain: 'claw-test-mirror2.brainlink.cloud' } },
+          { name: '官方管理员采购', method: 'POST', url: '/api/orders/order-004/purchase', body: { purchaseResult: 'approved' } },
+          { name: '主站对公转账', method: 'POST', url: '/api/orders/order-004/pay', body: { paymentMethod: 'bank_transfer', amount: 100000 } },
+          { name: '主站交付运维审核', method: 'POST', url: '/api/orders/order-004/review', body: { reviewResult: 'approved' } },
+          { name: '主站财务确认', method: 'POST', url: '/api/orders/order-004/confirm', body: { confirmResult: 'confirmed' } },
+          { name: '开通服务', method: 'POST', url: '/api/orders/order-004/activate' }
+        ],
+        'overview': [
+          { name: '镜像站官方管理员登录', method: 'POST', url: '/proxy/mirror1/api/auth/login', body: { username: '17726263423', password: '12345qwe', domain: 'claw-test-mirror.brainlink.cloud' } },
+          { name: '查看订单总览', method: 'POST', url: '/api/orders/overview', body: {} },
+          { name: '选择待采购订单', method: 'POST', url: '/api/orders/pending', body: {} },
+          { name: '执行采购', method: 'POST', url: '/api/orders/order-005/purchase', body: { purchaseResult: 'approved' } }
+        ]
+      };
+      
+      const results = await executeFlowSteps(steps[type]);
+      displayFlowResults(resultsDiv, results);
+      updateStats(results);
+    }
+    
+    async function executeFlowSteps(steps) {
+      const results = [];
+      for (const step of steps) {
+        try {
+          const options = { method: step.method, headers: { 'Content-Type': 'application/json' } };
+          if (step.body) options.body = JSON.stringify(step.body);
+          
+          const response = await fetch(step.url, options);
+          const data = await response.json();
+          
+          results.push({ step: step.name, status: response.ok ? 'success' : 'failed', statusCode: response.status, data });
+          await new Promise(r => setTimeout(r, 500));
+        } catch (error) {
+          results.push({ step: step.name, status: 'failed', statusCode: 500, error: error.message });
+        }
+      }
+      return results;
+    }
+
+    function displayFlowResults(container, results) {
+      container.innerHTML = results.map(r => `
+        <div class="result-item ${r.status}">
+          <strong>${r.step}</strong> | ${r.statusCode} | ${r.status === 'success' ? '成功' : '失败'}
+          ${r.data ? '<br><pre>' + JSON.stringify(r.data, null, 2).substring(0, 500) + '</pre>' : ''}
+          ${r.error ? '<br>错误: ' + r.error : ''}
+        </div>
+      `).join('');
+    }
+
+    function updateStats(results) {
+      const total = results.length;
+      const success = results.filter(r => r.status === 'success').length;
+      const failed = total - success;
+      const rate = total > 0 ? Math.round((success / total) * 100) : 0;
+      
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-success').textContent = success;
+      document.getElementById('stat-failed').textContent = failed;
+      document.getElementById('stat-rate').textContent = rate + '%';
+    }
+
+    const DOMAINS = {
+      mirror1: 'claw-test-mirror.brainlink.cloud',
+      mirror2: 'claw-test-mirror2.brainlink.cloud'
+    };
+    
+    function testSiteInfo() {
+      const site = document.getElementById('site-select').value;
+      const domain = DOMAINS[site];
+      const resultDiv = document.getElementById('proxy-site-info-result');
+      const btn = event.target;
+      
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'response-area success';
+      resultDiv.innerHTML = `<pre>{
+  "site": "${site}",
+  "domain": "${domain}",
+  "baseUrl": "https://${domain}",
+  "description": "站点信息获取成功"
+}</pre>`;
+    }
+    
+    async function testLogin(username) {
+      const site = document.getElementById('site-select').value;
+      const domain = DOMAINS[site];
+      const resultId = username + '-result';
+      const resultDiv = document.getElementById('proxy-auth-login-' + (username === '17772627362' ? '' : username === '19902928273' ? 'mirror-' : 'admin-') + 'result');
+      const btn = event.target;
+      
+      if (!resultDiv) return;
+      
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'response-area';
+      resultDiv.innerHTML = '<pre>正在请求主站...</pre>';
+      btn.disabled = true;
+      
+      try {
+        const body = { username, password: '12345qwe', domain };
+        const response = await fetch(`/proxy/${site}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.className = 'response-area success';
+          resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2).substring(0, 2000) + '</pre>';
+        } else {
+          resultDiv.className = 'response-area error';
+          resultDiv.innerHTML = '<pre>状态码: ' + response.status + '\\n' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+      } catch (error) {
+        resultDiv.className = 'response-area error';
+        resultDiv.innerHTML = '<pre>错误: ' + error.message + '</pre>';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    
+    async function testProxy(url, method, body) {
+      const site = document.getElementById('site-select').value;
+      const fullUrl = `/proxy/${site}${url}`;
+      const resultId = url.split('/').pop() + '-result';
+      const resultDiv = document.getElementById('proxy-' + resultId);
+      const btn = event.target;
+      
+      if (!resultDiv) return;
+      
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'response-area';
+      resultDiv.innerHTML = '<pre>正在请求主站...</pre>';
+      btn.disabled = true;
+      
+      try {
+        const options = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) options.body = JSON.stringify(body);
+        
+        const response = await fetch(fullUrl, options);
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.className = 'response-area success';
+          resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2).substring(0, 2000) + '</pre>';
+        } else {
+          resultDiv.className = 'response-area error';
+          resultDiv.innerHTML = '<pre>状态码: ' + response.status + '\\n' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+      } catch (error) {
+        resultDiv.className = 'response-area error';
+        resultDiv.innerHTML = '<pre>错误: ' + error.message + '</pre>';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    
+    async function testLocal(url, method, body) {
+      const resultId = url.split('/').pop() + '-result';
+      const resultDiv = document.getElementById('local-' + resultId);
+      const btn = event.target;
+      
+      if (!resultDiv) return;
+      
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'response-area';
+      resultDiv.innerHTML = '<pre>正在请求本地服务器...</pre>';
+      btn.disabled = true;
+      
+      try {
+        const options = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) options.body = JSON.stringify(body);
+        
+        const response = await fetch(url, options);
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.className = 'response-area success';
+          resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        } else {
+          resultDiv.className = 'response-area error';
+          resultDiv.innerHTML = '<pre>状态码: ' + response.status + '\n' + JSON.stringify(data, null, 2) + '</pre>';
+        }
+      } catch (error) {
+        resultDiv.className = 'response-area error';
+        resultDiv.innerHTML = '<pre>错误: ' + error.message + '</pre>';
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initApiGrid);
+  </script>
+</body>
+</html>
